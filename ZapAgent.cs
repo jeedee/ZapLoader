@@ -5,9 +5,12 @@ using System.Collections.Generic;
 namespace ZapLoader
 {
 	public class ZapAgent : MonoBehaviour {
+		BoxCollider boxCollider;
+
 		/// <summary>
 		/// The radius of which the agent will be able to load chunks
 		/// </summary>
+
 		public Vector3 radius = Vector3.one;
 		public Vector3 boundCenter
 		{
@@ -18,6 +21,7 @@ namespace ZapLoader
 					return this.transform.position;
 				}else{
 					return cameraRenderCenter;
+					//return boxCollider.center;
 				}
 			}
 		}
@@ -41,10 +45,12 @@ namespace ZapLoader
 
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(boundCenter, radius);
+			Gizmos.DrawSphere(cameraRenderCenter, 30.0f);
 		}
 
 		void CameraBounds ()
 		{
+			DestroyImmediate(gameObject.GetComponent<BoxCollider>());
 			// Abort if no camera is present on the agent gameobject
 			if (this.GetComponent<Camera>() == null)
 			{
@@ -52,15 +58,19 @@ namespace ZapLoader
 				return;
 			}
 
-			// Find the center of the camera
-			cameraRenderCenter = transform.position + new Vector3(0, 0, GetComponent<Camera>().farClipPlane/2);
+			// Find the center of the camera viewport
+			cameraRenderCenter = transform.position + (transform.rotation * new Vector3(0, 0, this.GetComponent<Camera>().farClipPlane/2));
 
-			// Set the radius
+			// Get FOV height
 			float fovHeight = 2.0f * this.GetComponent<Camera>().farClipPlane * Mathf.Tan(GetComponent<Camera>().fieldOfView * 0.5f * Mathf.Deg2Rad);
 
-			radius.x = fovHeight * GetComponent<Camera>().aspect;
+			// Set radius
+			radius.x = (fovHeight*GetComponent<Camera>().aspect);
 			radius.y = fovHeight;
-			radius.z = GetComponent<Camera>().farClipPlane;
+			radius.z = GetComponent<Camera>().farClipPlane*2;
+
+			// Take rotations in account
+			radius *= 3;
 		}
 
 		void Update ()

@@ -8,6 +8,19 @@ namespace ZapLoader
 {
 	public class ZapLoader : MonoBehaviour {
 		/// <summary>
+		/// Lock X axis when fetching chunks (Never increment)
+		/// </summary>
+		public bool LockX = false;
+		/// <summary>
+		/// Lock Y axis when fetching chunks (Never increment)
+		/// </summary>
+		public bool LockY = false;
+		/// <summary>
+		/// Lock Z axis when fetching chunks (Never increment)
+		/// </summary>
+		public bool LockZ = false;
+
+		/// <summary>
 		/// This structure keeps the loaded chunks in memory and store the last time they have been requested
 		/// </summary>
 		Dictionary<Vector3, float> loadedChunks = new Dictionary<Vector3, float>();
@@ -171,6 +184,14 @@ namespace ZapLoader
 		public void RenderChunks (Vector3 at, Vector3 radius)
 		{
 			radius /= 2;
+
+			// Manage locks
+			if (LockX)
+				at.x = radius.x = 0;
+			if (LockY)
+				at.y = radius.y = 0;
+			if (LockZ)
+				at.z = radius.z = 0;
 
 			// Calculate bounds
 			for (float x = RoundUpToChunk(at.x-radius.x); x <= RoundUpToChunk(at.x+radius.x); x+= chunkSize)
